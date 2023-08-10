@@ -2,11 +2,11 @@ from spectral import *
 import spectral.io.envi as envi
 import numpy as np
 
-normale_image_path = "./preprocessing/input/FX10/OK/Kartoffel_Premiere_FX10_8.hdr"
-normale_image_path_bin = "./preprocessing/input/FX10/OK/Kartoffel_Premiere_FX10_8.bin"
+normale_image_path = "./preprocessing/input/FX10/Gruen/Kartoffel_Fontane_FX10_8.hdr"
+normale_image_path_bin = "./preprocessing/input/FX10/Gruen/Kartoffel_Fontane_FX10_8.bin"
 
-reduced_image_path = "./preprocessing/output/FX10/OK/Kartoffel_Premiere_FX10_8.npy"
-output_image_path = "./preprocessing/output/FX10/OK/Kartoffel_Premiere_FX10_8_reduced.hdr"
+reduced_image_path = "./preprocessing/output/FX10/Gruen/Kartoffel_Fontane_FX10_8.npy"
+output_image_path = "./preprocessing/output/FX10/Gruen/Kartoffel_Fontane_FX10_8_reduced.hdr"
 
 loaded_array = np.load(reduced_image_path)
 
