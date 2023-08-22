@@ -1,63 +1,86 @@
-import matplotlib.pyplot as plt
-import numpy
-from spectral import *
-import spectral.io.envi as envi
 import numpy as np
+import os
+import fnmatch
+from config import *
 
-
-def generate_band_distances(img):
+def get_distance_density(img_array, predefined_segments, final_select_amount):
+    """ Calculates the distance density for a pre-segmented hyperspectral image
+    :param img_array: the hyperspectral image as numpy-array
+    :param predefined_segments: a list of pre-defined band subregions
+    :param final_select_amount: the amount of bands for the final selection
+    :return: array containing all distance densities for the given segments
     """
-    Generates the absolute difference between two adjacent bands for every band
+    if np.ndim(img_array) != 3:
+        raise ValueError("the input image should have 3 dimensions")
 
-    :arg:
-        img (np array): the hyperspectral image as Numpy-Array
+    image_x_size = img_array.shape[0]
+    image_y_size = img_array.shape[1]
+    image_band_amount = img_array.shape[2]
 
-    :return:
-        res (np array): Array containing all distances (index i holds the absolute distance from band i to band i+1)
-    """
+    r = np.zeros(image_band_amount)
+    d = np.zeros(image_band_amount)
+    dd = np.zeros(len(predefined_segments))
+    nb = np.zeros(len(predefined_segments))
 
-    band_amount = img.shape[2]
-    erg = numpy.zeros((band_amount, img.shape[0], img.shape[1]))
+    for k in range(0, image_band_amount):
+        r_i = 0
 
-    for i in range(0, band_amount - 1):
-        r_i = img.read_band(i)
-        r_i_p1 = img.read_band(i + 1)
-        d_i = abs(r_i_p1 - r_i)
-        erg[i] = d_i
+        for x in range(0, image_x_size):
+            for y in range(0, image_y_size):
+                r_i += img_array[x, y, k]
 
-    return erg
+        r[k] = r_i
 
+    for i in range(0, image_band_amount - 1):
+        d[i] = np.abs(np.subtract(r[i + 1], r[i]))
 
-reduced_image_path = "../preprocessing/output/FX10/Gruen/Kartoffel_Fontane_FX10_9.npy"
-output_image_path = "../preprocessing/output/FX10/Gruen/Kartoffel_Fontane_FX10_9_reduced.hdr"
+    for segment_index, segment in enumerate(predefined_segments):
+        seg_start = segment[0]
+        n = len(segment)
 
-loaded_array = np.load(reduced_image_path)
+        for i in range(seg_start, seg_start + n):
+            dd[segment_index] += d[i]
 
-current_img = envi.create_image(output_image_path,
-                        interleave="BIL",
-                        dtype="uint16",
-                        force=True, ext="hdr",
-                        shape=loaded_array.shape)
+        dd[segment_index] *= (1 / n)
 
-mm = current_img.open_memmap(writable=True)
-mm[:, :, :] = loaded_array
+    for i in range(len(predefined_segments)):
+        nb[i] = np.round((dd[i] / np.sum(dd)) * final_select_amount)
 
-# Generate segments based on correlation matrix
-segment_0 = current_img.read_bands([item for item in range(0, 9)])
-segment_1 = current_img.read_bands([item for item in range(9, 40)])
-segment_2 = current_img.read_bands([item for item in range(40, 150)])
-segment_3 = current_img.read_bands([item for item in range(150, 190)])
-segment_4 = current_img.read_bands([item for item in range(190, 223)])
-
-d = generate_band_distances(current_img)
-s = segment_2.shape[2]
+    return nb
 
 
-temp_sum = 0
-for i in range(1, s-1):
-    temp_sum += d[i]
+def segment():
+    try:
+        input_path = "preprocessing/output"
+        output_path = "segmentation/"
 
-dd_1 = (1/s) * temp_sum
+        dirname = os.path.dirname(__file__).replace("src", "")
+        input_path = os.path.join(dirname, input_path)
+        output_path = os.path.join(dirname, output_path)
 
-print(dd_1)
+        if not os.path.exists(input_path):
+            raise Exception("input path not found")
 
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+
+        for root, dirs, filenames in os.walk(input_path):
+            for filename in fnmatch.filter(filenames, "*.npy"):
+                image_file_path = os.path.join(root, filename)
+                loaded_image = np.load(image_file_path)
+                bands_per_segment = get_distance_density(loaded_image, BAND_SEGMENTS, FINAL_SELECT_AMOUNT)
+
+                fig_title = filename.replace(input_path + "/", "")
+                cur_out_dir = image_file_path.replace(fig_title, "").replace(input_path, output_path[:-1])
+                if not os.path.isdir(cur_out_dir):
+                    os.makedirs(cur_out_dir)
+
+                final_image_path = os.path.join(cur_out_dir, "DD_" + fig_title)
+                np.save(final_image_path, bands_per_segment)
+
+    except Exception as e:
+        print(str(e))
+
+
+if __name__ == "__main__":
+    segment()
