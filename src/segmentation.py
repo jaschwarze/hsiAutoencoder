@@ -68,7 +68,17 @@ def segment():
             for filename in fnmatch.filter(filenames, "*.npy"):
                 image_file_path = os.path.join(root, filename)
                 loaded_image = np.load(image_file_path)
-                bands_per_segment = get_distance_density(loaded_image, BAND_SEGMENTS, FINAL_SELECT_AMOUNT)
+
+                if "OK" in image_file_path:
+                    current_segments = BAND_SEGMENTS_OK
+                elif "Gruen" in image_file_path:
+                    current_segments = BAND_SEGMENTS_GREEN
+                elif "Beschaedigt" in image_file_path:
+                    current_segments = BAND_SEGMENTS_DAMAGED
+                else:
+                    raise Exception("image quality not found")
+
+                bands_per_segment = get_distance_density(loaded_image, current_segments, FINAL_SELECT_AMOUNT)
 
                 fig_title = filename.replace(input_path + "/", "")
                 cur_out_dir = image_file_path.replace(fig_title, "").replace(input_path, output_path[:-1])
