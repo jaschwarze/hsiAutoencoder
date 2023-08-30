@@ -1,4 +1,6 @@
 FINAL_SELECT_AMOUNT = 30
+ALPHA = 0.0001
+BETA = 0.1
 
 BAND_SEGMENTS_OK = [
     [*range(0, 45)],
