@@ -37,7 +37,8 @@ class Autoencoder(Model):
         return (
                 frobenius_loss(y_true, y_pred)
                 + ALPHA * row_sparse_regularization(self.autoencoder.layers[1].weights[0])
-                + (BETA / 2) * (tf.norm(self.autoencoder.layers[1].weights[0], ord="fro", axis=[-2, -1]) + tf.norm(self.autoencoder.layers[2].weights[0], ord="fro", axis=[-2, -1]))
+                + (BETA / 2) * (tf.norm(self.autoencoder.layers[1].weights[0], ord="fro", axis=[-2, -1]) +
+                                tf.norm(self.autoencoder.layers[2].weights[0], ord="fro", axis=[-2, -1]))
         )
 
     def train(self, data, epochs, batch_size, shuffle, validation_data=None):
@@ -49,3 +50,6 @@ class Autoencoder(Model):
 
     def decode(self, encoded_image):
         return self.decoder.predict(encoded_image)
+
+    def save(self, filepath, overwrite=True, save_format=None, **kwargs):
+        self.autoencoder.save(filepath=filepath, overwrite=overwrite, save_format=save_format)
