@@ -51,10 +51,10 @@ def train_model(quality, sensor_string="FX10"):
         if not os.path.exists("../trained_models/" + sensor_string + "/" + quality):
             os.mkdir("../trained_models/" + sensor_string + "/" + quality)
 
-        ae_save_path = "../trained_models/" + sensor_string + "/" + quality + "/ae_" + quality + "_" + config[
+        ae_save_path = "../trained_models/" + sensor_string + "/" + quality + "/enc_" + quality + "_" + config[
             "segment_range"] + ".keras"
 
-        config["ae_object"].save(ae_save_path)
+        config["ae_object"].save_encoder(ae_save_path)
 
     return segment_aes
 

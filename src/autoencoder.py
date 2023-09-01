@@ -51,5 +51,5 @@ class Autoencoder(Model):
     def decode(self, encoded_image):
         return self.decoder.predict(encoded_image)
 
-    def save(self, filepath, overwrite=True, save_format=None, **kwargs):
-        self.autoencoder.save(filepath=filepath, overwrite=overwrite, save_format=save_format)
+    def save_encoder(self, filepath, overwrite=True, save_format=None, **kwargs):
+        self.encoder.save(filepath=filepath, overwrite=overwrite, save_format=save_format)
