@@ -1,5 +1,5 @@
 from dataloader import load_training_data
-from config import *
+from src.config import *
 from sklearn.model_selection import train_test_split
 from autoencoder import Autoencoder
 import os

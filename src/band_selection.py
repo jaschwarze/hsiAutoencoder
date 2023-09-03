@@ -1,8 +1,8 @@
 import keras
 import numpy as np
 import os
-from autoencoder import *
 import tensorflow as tf
+from src.config import *
 
 
 def select_bands(img_path):

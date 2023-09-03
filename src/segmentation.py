@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import fnmatch
-from config import *
+from src.config import *
 
 def get_distance_density(img_array, predefined_segments, final_select_amount):
     """ Calculates the distance density for a pre-segmented hyperspectral image

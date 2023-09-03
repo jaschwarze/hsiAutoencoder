@@ -2,7 +2,7 @@ import keras
 from keras.models import Model
 from keras.layers import Input, Dense
 import tensorflow as tf
-from config import *
+from src.config import *
 
 
 def frobenius_loss(y_true, y_pred):
