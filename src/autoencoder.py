@@ -45,6 +45,10 @@ class Autoencoder(Model):
         return self.autoencoder.fit(x=data, y=data, epochs=epochs, batch_size=batch_size, shuffle=shuffle,
                                     validation_data=validation_data)
 
+    def call(self, inputs, training=None, mask=None):
+        encoded = self.encoder(inputs)
+        return self.decoder(encoded)
+
     def encode(self, image):
         return self.encoder.predict(image)
 
