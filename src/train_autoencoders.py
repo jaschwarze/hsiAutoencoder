@@ -37,8 +37,8 @@ def train_model(quality, sensor_string="FX10"):
 
     for config in segment_aes:
         config["training_history"] = config["ae_object"].train(config["x_train"],
-                                                               epochs=40,
-                                                               batch_size=2500,
+                                                               epochs=EPOCHS,
+                                                               batch_size=BATCH_SIZE,
                                                                shuffle=True,
                                                                validation_data=(config["x_test"], config["x_test"]))
 
