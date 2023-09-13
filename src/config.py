@@ -5,25 +5,21 @@ EPOCHS = 40
 BATCH_SIZE = 2500
 
 BAND_SEGMENTS_OK = [
-    [*range(0, 45)],
-    [*range(45, 80)],
-    [*range(80, 133)],
-    [*range(133, 184)],
-    [*range(184, 224)]
+    [*range(0, 36)],
+    [*range(36, 71)],
+    [*range(71, 133)],
+    [*range(133, 224)]
 ]
 
 BAND_SEGMENTS_GREEN = [
-    [*range(0, 69)],
-    [*range(69, 104)],
-    [*range(104, 142)],
-    [*range(142, 193)],
-    [*range(193, 224)]
+    [*range(0, 30)],
+    [*range(30, 114)],
+    [*range(114, 224)]
 ]
 
 BAND_SEGMENTS_DAMAGED = [
-    [*range(0, 64)],
-    [*range(64, 104)],
-    [*range(104, 142)],
-    [*range(142, 193)],
-    [*range(193, 224)]
+    [*range(0, 28)],
+    [*range(28, 64)],
+    [*range(64, 132)],
+    [*range(132, 224)]
 ]
