@@ -3,6 +3,7 @@ import os
 import fnmatch
 from src.config import *
 
+
 def get_distance_density(img_array, predefined_segments, final_select_amount):
     """ Calculates the distance density for a pre-segmented hyperspectral image
     :param img_array: the hyperspectral image as numpy-array
@@ -13,8 +14,6 @@ def get_distance_density(img_array, predefined_segments, final_select_amount):
     if np.ndim(img_array) != 3:
         raise ValueError("the input image should have 3 dimensions")
 
-    image_x_size = img_array.shape[0]
-    image_y_size = img_array.shape[1]
     image_band_amount = img_array.shape[2]
 
     r = np.zeros(image_band_amount)
@@ -23,13 +22,7 @@ def get_distance_density(img_array, predefined_segments, final_select_amount):
     nb = np.zeros(len(predefined_segments))
 
     for k in range(0, image_band_amount):
-        r_i = 0
-
-        for x in range(0, image_x_size):
-            for y in range(0, image_y_size):
-                r_i += img_array[x, y, k]
-
-        r[k] = r_i
+        r[k] = np.sum(img_array[:, :, k])
 
     for i in range(0, image_band_amount - 1):
         d[i] = np.abs(np.subtract(r[i + 1], r[i]))
