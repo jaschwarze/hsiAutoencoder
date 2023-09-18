@@ -51,7 +51,7 @@ def select_bands(img_path):
         current_enc = keras.models.load_model(enc_path, compile=False)
         hidden_layer = current_enc.get_layer("hidden_layer")
         weights = hidden_layer.get_weights()[0]
-        normalized_weights = tf.norm(weights, axis=1)
+        normalized_weights = tf.norm(weights, axis=1, ord=2)
         normalized_weights.numpy()
 
         for band in np.argsort(-normalized_weights)[:int(distance_densities[index])]:
