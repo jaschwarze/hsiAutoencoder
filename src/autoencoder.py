@@ -3,7 +3,7 @@ from keras.models import Model
 from keras.layers import Input, Dense
 import tensorflow as tf
 from src.config import *
-import numpy as np
+
 
 def frobenius_loss(y_true, y_pred):
     m = tf.cast(tf.shape(y_true)[0], dtype=tf.float32)
