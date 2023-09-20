@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import fnmatch
-from src.config import *
+import src.config as config
 
 
 def get_distance_density(img_array, predefined_segments, final_select_amount):
@@ -44,12 +44,8 @@ def get_distance_density(img_array, predefined_segments, final_select_amount):
 
 def segment():
     try:
-        input_path = "preprocessing/output"
-        output_path = "segmentation/"
-
-        dirname = os.path.dirname(__file__).replace("src", "")
-        input_path = os.path.join(dirname, input_path)
-        output_path = os.path.join(dirname, output_path)
+        input_path = os.path.join(config.PREPROCESSING_PATH, "output")
+        output_path = config.METRIC_PATH
 
         if not os.path.exists(input_path):
             raise Exception("input path not found")
@@ -63,15 +59,15 @@ def segment():
                 loaded_image = np.load(image_file_path)
 
                 if "OK" in image_file_path:
-                    current_segments = BAND_SEGMENTS_OK
+                    current_segments = config.BAND_SEGMENTS_OK
                 elif "Gruen" in image_file_path:
-                    current_segments = BAND_SEGMENTS_GREEN
+                    current_segments = config.BAND_SEGMENTS_GREEN
                 elif "Beschaedigt" in image_file_path:
-                    current_segments = BAND_SEGMENTS_DAMAGED
+                    current_segments = config.BAND_SEGMENTS_DAMAGED
                 else:
                     raise Exception("image quality not found")
 
-                bands_per_segment = get_distance_density(loaded_image, current_segments, FINAL_SELECT_AMOUNT)
+                bands_per_segment = get_distance_density(loaded_image, current_segments, config.FINAL_SELECT_AMOUNT)
 
                 fig_title = filename.replace(input_path + "/", "")
                 cur_out_dir = image_file_path.replace(fig_title, "").replace(input_path, output_path[:-1])

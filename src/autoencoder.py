@@ -2,7 +2,7 @@ import keras
 from keras.models import Model
 from keras.layers import Input, Dense
 import tensorflow as tf
-from src.config import *
+import src.config as config
 
 
 def frobenius_loss(y_true, y_pred):
@@ -36,8 +36,8 @@ class Autoencoder(Model):
     def combined_loss(self, y_true, y_pred):
         return (
                 frobenius_loss(y_true, y_pred)
-                + ALPHA * row_sparse_regularization(self.autoencoder.layers[1].weights[0])
-                + (BETA / 2) * (tf.norm(self.autoencoder.layers[1].weights[0], ord="fro", axis=[-2, -1]) +
+                + config.ALPHA * row_sparse_regularization(self.autoencoder.layers[1].weights[0])
+                + (config.BETA / 2) * (tf.norm(self.autoencoder.layers[1].weights[0], ord="fro", axis=[-2, -1]) +
                                 tf.norm(self.autoencoder.layers[2].weights[0], ord="fro", axis=[-2, -1]))
         )
 

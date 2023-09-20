@@ -7,7 +7,7 @@ import os
 import numpy as np
 import fnmatch
 from sklearn.preprocessing import normalize
-
+import src.config as config
 
 def calc_hist(reshaped):
     histograms = []
@@ -48,12 +48,8 @@ def prepare_hyper(x_input, masking, x_begin, x_stop):
 
 def preprocess():
     try:
-        input_path = "preprocessing/input"
-        output_path = "preprocessing/output"
-
-        dirname = os.path.dirname(__file__).replace("src", "")
-        input_path = os.path.join(dirname, input_path)
-        output_path = os.path.join(dirname, output_path)
+        input_path = os.path.join(config.PREPROCESSING_PATH, "input")
+        output_path = os.path.join(config.PREPROCESSING_PATH, "output")
 
         if not os.path.exists(input_path):
             raise Exception("input path not found")
@@ -65,6 +61,11 @@ def preprocess():
             for filename in fnmatch.filter(filenames, "*.hdr"):
                 hdr_file_path = os.path.join(root, filename)
                 bin_file_path = hdr_file_path.replace("hdr", "bin")
+
+                output_file_path = hdr_file_path.replace("input", "output").replace("hdr", "npy")
+
+                if os.path.isfile(output_file_path):
+                    continue
 
                 if not os.path.isfile(bin_file_path):
                     print(f".bin file for {hdr_file_path} not found")
@@ -123,8 +124,8 @@ def preprocess():
                     if not os.path.isdir(cur_out_dir):
                         os.makedirs(cur_out_dir)
 
-                    print(hdr_file_path.replace("input", "output").replace("hdr", "npy"))
-                    np.save(hdr_file_path.replace("input", "output").replace("hdr", "npy"), x_prepared)
+                    print(output_file_path)
+                    np.save(output_file_path, x_prepared)
 
     except Exception as e:
         print(str(e))
