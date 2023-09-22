@@ -24,15 +24,17 @@ def load_training_data(base_path):
     for idx, file_path in enumerate(image_paths):
         image_numpy = np.load(file_path)
 
+        if np.ndim(image_numpy) != 3:
+            continue
+
         # mask all black pixels from the pre-processing (reflectance spectra is 0)
-        reflectance_mask = np.sum(image_numpy, axis=2) == 0
+        image_numpy = np.reshape(image_numpy, (image_numpy.shape[0] * image_numpy.shape[1], image_numpy.shape[2]))
+        reflectance_mask = np.sum(image_numpy, axis=1) == 0
 
-        for x in range(image_numpy.shape[0]):
-            for y in range(image_numpy.shape[1]):
-                if reflectance_mask[x, y]:
-                    continue
+        image_numpy = image_numpy[~reflectance_mask]
 
-                res.append(image_numpy[x, y])
+        for i in range(image_numpy.shape[0]):
+            res.append(image_numpy[i])
 
     res = np.array(res)
 
