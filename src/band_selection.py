@@ -24,7 +24,7 @@ def select_bands(img_path):
 
     if "FX10" in img_path:
         sensor_string = "FX10"
-    elif "FX10" in img_path:
+    elif "FX17" in img_path:
         sensor_string = "FX17"
     else:
         raise ValueError("sensor type not found")
