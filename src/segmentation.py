@@ -1,4 +1,4 @@
-import numpy as np
+import cupy as cp
 import os
 import fnmatch
 import logging
@@ -14,21 +14,21 @@ def get_distance_density(img_array, predefined_segments, final_select_amount):
     :param final_select_amount: the amount of bands for the final selection
     :return: array containing all distance densities for the given segments
     """
-    if np.ndim(img_array) != 3:
+    if cp.ndim(img_array) != 3:
         raise ValueError("the input image should have 3 dimensions")
 
     image_band_amount = img_array.shape[2]
 
-    r = np.zeros(image_band_amount)
-    d = np.zeros(image_band_amount)
-    dd = np.zeros(len(predefined_segments))
-    nb = np.zeros(len(predefined_segments))
+    r = cp.zeros(image_band_amount)
+    d = cp.zeros(image_band_amount)
+    dd = cp.zeros(len(predefined_segments))
+    nb = cp.zeros(len(predefined_segments))
 
     for k in range(0, image_band_amount):
-        r[k] = np.sum(img_array[:, :, k])
+        r[k] = cp.sum(img_array[:, :, k])
 
     for i in range(0, image_band_amount - 1):
-        d[i] = np.abs(np.subtract(r[i + 1], r[i]))
+        d[i] = cp.abs(cp.subtract(r[i + 1], r[i]))
 
     for segment_index, segment in enumerate(predefined_segments):
         seg_start = segment[0]
@@ -40,16 +40,16 @@ def get_distance_density(img_array, predefined_segments, final_select_amount):
         dd[segment_index] *= (1 / n)
 
     for i in range(len(predefined_segments)):
-        nb[i] = np.round((dd[i] / np.sum(dd)) * final_select_amount)
+        nb[i] = cp.round((dd[i] / cp.sum(dd)) * final_select_amount)
 
-    nb_sum = np.sum(nb)
+    nb_sum = cp.sum(nb)
     difference = final_select_amount - nb_sum
 
     if difference > 0:
-        min_index = np.argmin(nb)
+        min_index = cp.argmin(nb)
         nb[min_index] += difference
     elif difference < 0:
-        max_index = np.argmax(nb)
+        max_index = cp.argmax(nb)
 
         if (nb[max_index] + difference) > 0:
             nb[max_index] += difference
@@ -59,7 +59,7 @@ def get_distance_density(img_array, predefined_segments, final_select_amount):
 
         if nb[idx] > seg_len:
             diff = nb[idx] - seg_len
-            min_index = np.argmin(nb)
+            min_index = cp.argmin(nb)
 
             if (nb[idx] - diff) > 0:
                 nb[idx] -= diff
@@ -70,7 +70,7 @@ def get_distance_density(img_array, predefined_segments, final_select_amount):
         if nb[idx] > seg_len or nb[idx] < 0:
             raise ValueError(f"Invalid band amount")
 
-    if np.sum(nb) != final_select_amount:
+    if cp.sum(nb) != final_select_amount:
         raise ValueError(f"Invalid band amount")
 
     return nb
@@ -85,14 +85,14 @@ def calc_metric_file(image_path, output_path, current_segments, final_select_amo
     if os.path.isfile(final_image_path):
         return
 
-    loaded_image = np.load(image_path)
+    loaded_image = cp.load(image_path)
     bands_per_segment = get_distance_density(loaded_image, current_segments, final_select_amount)
 
     if not os.path.isdir(cur_out_dir):
         os.makedirs(cur_out_dir)
 
     logging.info("Final im path:", final_image_path)
-    np.save(final_image_path, bands_per_segment)
+    cp.save(final_image_path, bands_per_segment)
 
 
 def calc_segment(input_path, output_path, current_segments, final_select_amount):
