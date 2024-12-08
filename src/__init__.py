@@ -1,7 +1,8 @@
 __all__ = ["autoencoder",
-           "band_selection",
+           "reduce",
            "config",
            "dataloader",
            "preprocessing",
            "segmentation",
+           "normalize",
            "train_autoencoders"]
