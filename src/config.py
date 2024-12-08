@@ -13,22 +13,5 @@ EPOCHS = 1200
 BATCH_SIZE = 2500
 TEST_RATE = 0.4
 
-BAND_SEGMENTS_OK = [
-    [*range(0, 36)],
-    [*range(36, 71)],
-    [*range(71, 133)],
-    [*range(133, 224)]
-]
-
-BAND_SEGMENTS_GREEN = [
-    [*range(0, 30)],
-    [*range(30, 114)],
-    [*range(114, 224)]
-]
-
-BAND_SEGMENTS_DAMAGED = [
-    [*range(0, 28)],
-    [*range(28, 64)],
-    [*range(64, 132)],
-    [*range(132, 224)]
-]
+BAND_SEGMENTS = [(0, 27), (27, 53), (53, 105), (105, 148), (148, 173), (173, 224)]
+CATEGORIES = ["ok", "gruen", "verformt", "faulig"]
