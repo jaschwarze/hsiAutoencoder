@@ -8,5 +8,6 @@ This repository provides functions to perform hyperspectral bandselection using 
 ## Usage
 1. perform preprocessing using [src/preprocessing.py](src/preprocessing.py)
 2. calculate distance density using [src/segmentation.py](src/segmentation.py)
-3. train segmented autoencoders with [src/train_autoencoders.py](src/train_autoencoders.py)
-4. generate reduced images using [src/band_selection.py](src/band_selection.py)
+3. normalize images with [src/normalize.py](src/normalize.py)
+4. train segmented autoencoders with [src/train_autoencoders.py](src/train_autoencoders.py)
+5. generate reduced images using [src/band_selection.py](src/band_selection.py)
