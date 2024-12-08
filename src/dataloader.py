@@ -1,52 +1,73 @@
+import keras
 import os
 import fnmatch
 import numpy as np
-import tensorflow as tf
 
 
-def load_training_data(base_path):
-    """
-    This functions loads all hyperspectral images from a given location and returns the normed spectra [0, 1] for every
-    pixel
-    :param base_path: path to the directory containing the numpy-files for the hyperspectral images
-    :return: numpy-array with the normed pixel spectra's for every pixel in every image
-    """
-    if not os.path.exists(base_path):
-        raise ValueError("base dir not found")
+class HyperspectralSegmentLoader(keras.utils.PyDataset):
+    def __init__(self, base_dir, batch_size, segment_start, segment_end, **kwargs):
+        super().__init__(**kwargs)
+        self.base_dir = base_dir
+        self.batch_size = batch_size
+        self.image_paths = []
+        self.number_samples = 0
+        self.file_sample_indices = dict()
+        self.segment_start = segment_start
+        self.segment_end = segment_end
 
-    image_paths = []
-    res = []
+        for root, dirs, filenames in os.walk(self.base_dir):
+            for filename in fnmatch.filter(filenames, "*.npy"):
+                self.image_paths.append(os.path.join(root, filename))
 
-    for root, dirs, filenames in os.walk(base_path):
-        for filename in fnmatch.filter(filenames, "*.npy"):
-            image_paths.append(os.path.join(root, filename))
+        for idx, file_path in enumerate(self.image_paths):
+            image_numpy = np.load(file_path)
 
-    for idx, file_path in enumerate(image_paths):
-        image_numpy = np.load(file_path)
+            if np.ndim(image_numpy) != 2:
+                continue
 
-        if np.ndim(image_numpy) != 3:
-            continue
+            image_numpy = image_numpy[:, self.segment_start:self.segment_end]
 
-        # mask all black pixels from the pre-processing (reflectance spectra is 0)
-        image_numpy = np.reshape(image_numpy, (image_numpy.shape[0] * image_numpy.shape[1], image_numpy.shape[2]))
-        reflectance_mask = np.sum(image_numpy, axis=1) == 0
+            self.file_sample_indices[file_path] = [self.number_samples, self.number_samples + image_numpy.shape[0] - 1]
+            self.number_samples += image_numpy.shape[0]
 
-        image_numpy = image_numpy[~reflectance_mask]
+    def __len__(self):
+        return int(np.floor(self.number_samples / self.batch_size))
 
-        for i in range(image_numpy.shape[0]):
-            res.append(image_numpy[i])
+    def __getitem__(self, index):
+        low = index * self.batch_size
+        high = min(low + self.batch_size, self.number_samples) - 1
 
-    res = np.array(res)
+        files_to_load = {path: [] for path in self.file_sample_indices}
 
-    normed_res = tf.math.divide(
-        tf.math.subtract(
-            res,
-            tf.reduce_min(res)
-        ),
-        tf.math.subtract(
-            tf.reduce_max(res),
-            tf.reduce_min(res)
-        )
-    )
+        for file_path, indices in self.file_sample_indices.items():
+            lower_bound = indices[0]
+            upper_bound = indices[1]
 
-    return normed_res.numpy()
+            if lower_bound <= low <= upper_bound:
+                files_to_load[file_path].append(low)
+                if high > upper_bound:
+                    files_to_load[file_path].append(upper_bound)
+
+            if lower_bound <= high <= upper_bound:
+                files_to_load[file_path].append(high)
+                if low < lower_bound:
+                    files_to_load[file_path].append(lower_bound)
+
+            files_to_load[file_path].sort()
+
+        files_to_load = {k: v for k, v in files_to_load.items() if len(v) == 2}
+
+        return_arrays = []
+        for path, indices in files_to_load.items():
+            sample_offset = indices[0]
+
+            image_numpy = np.load(path)
+            image_numpy = image_numpy[:, self.segment_start:self.segment_end]
+            return_arrays.append(image_numpy[indices[0] - sample_offset:indices[1] - sample_offset + 1, :])
+
+        if len(return_arrays):
+            x, y = np.concatenate(return_arrays, axis=0), np.concatenate(return_arrays, axis=0)
+        else:
+            return None
+
+        return x, y
