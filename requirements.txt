@@ -1,0 +1,13 @@
+keras
+tensorflow
+scikit-image
+scikit-learn
+cupy-cuda12x
+matplotlib
+numpy
+scipy
+pillow
+spectral
+ipython
+PyOpenGL
+PyOpenGL_accelerate
